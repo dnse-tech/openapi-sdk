@@ -2,7 +2,7 @@
 Market data subscription example.
 
 Demonstrates:
-- Subscribing to OHLCV bar updates
+- Subscribing to trade extra updates
 
 This example shows how to receive real-time market data for multiple symbols.
 """
@@ -16,32 +16,26 @@ async def main():
     # Initialize client
     encoding = "msgpack"  # json or msgpack
     client = TradingClient(
-        api_key="api_key",
-        api_secret="api_secret",
-        base_url="wss://ws-openapi.dnse.com.vn",
+        api_key="eyJvcmciOiJkbnNlIiwiaWQiOiIyYmRkMTRkYzAyZGI0NDhhOTMyNDE4MzI4YWU3ZGNiMiIsImgiOiJtdXJtdXIxMjgifQ==",
+        api_secret="-xVyfXfkYQpXz29H-P3XD0bnzeyPHdyMIMT0VzwNxmCYI9clVJSq5uZooRD4v9Q0UwBIw8TA5XFvhP5vIamF-g",
+        base_url="wss://ws-openapi-uat.dnse.com.vn",
         encoding=encoding,
     )
 
-    def handle_bar(bar: Bar):
-        print(f"BAR: {bar}")
+    def handle_trade_extra(trade: TradeExtra):
+        print(f"TRADE EXTRA: {trade}")
 
     # Connect to gateway
     print("Connecting to WebSocket gateway...")
     await client.connect()
     print(f"Connected! Session ID: {client._session_id}\n")
 
-    print("Subscribing to bar for SSI and 41I1G2000...")
-    # internal 1 3 5 15 30 45 1H 4H 1D 1W
-    await client.subscribe_bars(["SSI", "41I1G2000"], resolution="1", on_bar=handle_bar, encoding=encoding)
-
-    # Subscribe to 1-minute OHLCV bars
-    # Bars aggregate trade data into time intervals
-    # print("Subscribing to 1-minute bars for TSLA...")
-    # await client.subscribe_bars(["TSLA"], interval="1m", on_bar=handle_bar)
+    print("Subscribing to trade extra for SSI and 41I1G2000...")
+    await client.subscribe_trade_extra(["SSI", "41I1G2000"], on_trade_extra=handle_trade_extra, encoding=encoding)
 
     print("\nReceiving market data (will run for 1 hour)...\n")
 
-    # Run for 60 seconds to collect data
+    # Run for 1H to collect data
     # In a real application, you might run indefinitely or until a specific condition
     await asyncio.sleep(60 * 60)
 
