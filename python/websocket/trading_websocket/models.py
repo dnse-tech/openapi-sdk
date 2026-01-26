@@ -214,53 +214,30 @@ class Quote:
 @dataclass
 class Bar:
     symbol: str
-    interval: str
+    resolution: int
     open: Decimal
     high: Decimal
     low: Decimal
     close: Decimal
     volume: int
-    timestamp: datetime
+    time: int
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Bar":
-
-        ts = data.get("t") or data.get("timestamp")
-        if isinstance(ts, str):
-            # New format: RFC-3339 string (e.g., "2023-11-14T22:13:20.123Z")
-            timestamp = datetime.fromisoformat(ts.replace('Z', '+00:00'))
-        else:
-            # Legacy format: Unix milliseconds (integer or float)
-            timestamp = datetime.fromtimestamp(ts / 1000)
-
         return cls(
-            symbol=data.get("S") or data.get("symbol"),
-            interval=data.get("n") or data.get("interval"),
-            open=Decimal(str(data.get("o") or data.get("open"))),
-            high=Decimal(str(data.get("h") or data.get("high"))),
-            low=Decimal(str(data.get("l") or data.get("low"))),
-            close=Decimal(str(data.get("c") or data.get("cl") or data.get("close"))),
+            symbol=data.get("s") or data.get("symbol"),
+            resolution=data.get("r") or data.get("resolution"),
+            open=data.get("o") or data.get("open"),
+            high=data.get("h") or data.get("high"),
+            low=data.get("l") or data.get("low"),
+            close=data.get("c") or data.get("close"),
             volume=data.get("v") or data.get("volume"),
-            timestamp=timestamp
+            time=data.get("t") or data.get("time"),
         )
 
 
 @dataclass
 class Order:
-    """Order update message.
-
-    Attributes:
-        order_id: Unique order identifier
-        symbol: Trading symbol (e.g., "AAPL")
-        side: Order side ("buy" or "sell")
-        order_type: Order type ("market", "limit", "stop", "stop_limit")
-        status: Order status ("pending", "new", "partially_filled", "filled", "cancelled", "rejected")
-        quantity: Total order quantity
-        filled_quantity: Quantity filled so far
-        price: Order price (None for market orders)
-        average_fill_price: Average price of fills (None if not filled)
-        timestamp: Update timestamp
-    """
     order_id: str
     symbol: str
     side: str
@@ -274,17 +251,6 @@ class Order:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Order":
-        """Parse order from message data.
-
-        Args:
-            data: Raw message dict with either abbreviated or full field names
-
-        Returns:
-            Order instance
-
-        Example:
-            >>> Order.from_dict({"oid": "123", "S": "AAPL", "sd": "buy", ...})
-        """
         return cls(
             order_id=data.get("oid") or data.get("order_id"),
             symbol=data.get("S") or data.get("symbol"),
@@ -301,18 +267,6 @@ class Order:
 
 @dataclass
 class Position:
-    """Position update message.
-
-    Attributes:
-        symbol: Trading symbol (e.g., "AAPL")
-        quantity: Current position quantity (positive for long, negative for short)
-        average_price: Average entry price
-        market_value: Current market value of position
-        cost_basis: Total cost basis
-        unrealized_pl: Unrealized profit/loss in dollars
-        unrealized_pl_percent: Unrealized profit/loss as percentage
-        timestamp: Update timestamp
-    """
     symbol: str
     quantity: int
     average_price: Decimal
@@ -349,15 +303,6 @@ class Position:
 
 @dataclass
 class AccountUpdate:
-    """Account balance update message.
-
-    Attributes:
-        cash: Available cash balance
-        buying_power: Current buying power
-        portfolio_value: Total portfolio value
-        equity: Account equity
-        timestamp: Update timestamp
-    """
     cash: Decimal
     buying_power: Decimal
     portfolio_value: Decimal
