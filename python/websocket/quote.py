@@ -14,8 +14,8 @@ async def main():
     # Initialize client
     encoding = "msgpack"  # json or msgpack
     client = TradingClient(
-        api_key="eyJvcmciOiJkbnNlIiwiaWQiOiJiYWMwNWY3OThmOTU0OWQ5YmNiOTYyNzQ3YzY3NzRlYSIsImgiOiJtdXJtdXIxMjgifQ==",
-        api_secret="D5KLFhyAV-qMffog5i6TRRHXxLv86Y8ozWUQkUeh6BCZ2WdN-OUoMk-kn5L-3ROZX0K4zdDQCYy5hrPGhjOl2w",
+        api_key="eyJvcmciOiJkbnNlIiwiaWQiOiIyYmRkMTRkYzAyZGI0NDhhOTMyNDE4MzI4YWU3ZGNiMiIsImgiOiJtdXJtdXIxMjgifQ==",
+        api_secret="-xVyfXfkYQpXz29H-P3XD0bnzeyPHdyMIMT0VzwNxmCYI9clVJSq5uZooRD4v9Q0UwBIw8TA5XFvhP5vIamF-g",
         base_url="wss://ws-openapi-uat.dnse.com.vn",
         encoding=encoding,
     )
