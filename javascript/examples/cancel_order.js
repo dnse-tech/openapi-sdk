@@ -1,0 +1,25 @@
+'use strict';
+
+const { DNSEClient } = require('../dnse');
+
+async function main() {
+  const client = new DNSEClient({
+    apiKey: 'replace-with-api-key',
+    apiSecret: 'replace-with-api-secret',
+    baseUrl: 'http://localhost:8080',
+  });
+
+  const { status, body } = await client.cancelOrder(
+    '0001000115',
+    '801',
+    'STOCK',
+    'replace-with-trading-token',
+    { dryRun: false },
+  );
+  console.log(status, body);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
