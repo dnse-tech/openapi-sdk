@@ -9,7 +9,19 @@ async function main() {
     baseUrl: 'https://openapi.dnse.com.vn',
   });
 
-  const { status, body } = await client.getBalances('0001000115', { dryRun: false });
+  const payload = {
+    price: 12500,
+    quantity: 100,
+  };
+
+  const { status, body } = await client.putOrder(
+    '0001000115',
+    '511',
+    'STOCK',
+    payload,
+    'replace-with-trading-token',
+    { dryRun: false },
+  );
   console.log(status, body);
 }
 

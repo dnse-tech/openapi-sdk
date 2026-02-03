@@ -2,7 +2,7 @@
 Market data subscription example.
 
 Demonstrates:
-- Subscribing to trade updates
+- Subscribing to trade extra updates
 
 This example shows how to receive real-time market data for multiple symbols.
 """
@@ -16,22 +16,22 @@ async def main():
     # Initialize client
     encoding = "msgpack"  # json or msgpack
     client = TradingClient(
-        api_key="api_key",
-        api_secret="api_scret",
-        base_url="wss://ws-openapi.dnse.com.vn",
+        api_key="api-key",
+        api_secret="api-secret",
+        base_url="wss://ws-openapi-uat.dnse.com.vn",
         encoding=encoding,
     )
 
-    def handle_trade(trade: Trade):
-        print(f"TRADE: {trade}")
+    def handle_trade_extra(trade: TradeExtra):
+        print(f"TRADE EXTRA: {trade}")
 
     # Connect to gateway
     print("Connecting to WebSocket gateway...")
     await client.connect()
     print(f"Connected! Session ID: {client._session_id}\n")
 
-    print("Subscribing to trades for SSI and 41I1G2000...")
-    await client.subscribe_trades(["SSI", "41I1G2000"], on_trade=handle_trade, encoding=encoding)
+    print("Subscribing to trade extra for SSI and 41I1G2000...")
+    await client.subscribe_trade_extra(["SSI", "41I1G2000"], on_trade_extra=handle_trade_extra, encoding=encoding)
 
     print("\nReceiving market data (will run for 1 hour)...\n")
 

@@ -14,7 +14,7 @@ const { DNSEClient } = require('./dnse');
 const client = new DNSEClient({
   apiKey: 'replace-with-api-key',
   apiSecret: 'replace-with-api-secret',
-  baseUrl: 'http://localhost:8080',
+  baseUrl: 'https://openapi.dnse.com.vn',
 });
 
 client.getAccounts({ dryRun: false })
@@ -47,8 +47,10 @@ Available examples:
 - get_deals.js
 - get_loan_packages.js
 - get_order_detail.js
+- get_order_history.js
 - get_orders.js
 - get_ppse.js
 - get_security_definition.js
 - post_order.js
+- put_order.js
 - send_email_otp.js

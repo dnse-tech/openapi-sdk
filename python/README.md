@@ -14,7 +14,7 @@ from dnse import DNSEClient
 client = DNSEClient(
     api_key="replace-with-api-key",
     api_secret="replace-with-api-secret",
-    base_url="http://localhost:8080",
+    base_url="https://openapi.dnse.com.vn",
 )
 
 status, body = client.get_accounts(dry_run=False)
@@ -42,8 +42,10 @@ Available examples:
 - get_deals.py
 - get_loan_packages.py
 - get_order_detail.py
+- get_order_history.py
 - get_orders.py
 - get_ppse.py
 - get_security_definition.py
 - post_order.py
+- put_order.py
 - send_email_otp.py

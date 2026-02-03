@@ -11,12 +11,15 @@ def main():
     client = DNSEClient(
         api_key="replace-with-api-key",
         api_secret="replace-with-api-secret",
-        base_url="http://localhost:8080",
+        base_url="https://openapi.dnse.com.vn",
     )
 
-    status, body = client.get_deals(
+    status, body = client.cancel_order(
         account_no="0001000115",
-        market_type="DERIVATIVE",
+        order_id="801",
+        market_type="STOCK",
+        trading_token="replace-with-trading-token",
+        order_category="NORMAL",
         dry_run=False,
     )
     print(status, body)

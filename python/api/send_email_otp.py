@@ -11,10 +11,10 @@ def main():
     client = DNSEClient(
         api_key="replace-with-api-key",
         api_secret="replace-with-api-secret",
-        base_url="http://localhost:8080",
+        base_url="https://openapi.dnse.com.vn",
     )
 
-    status, body = client.get_accounts(dry_run=False)
+    status, body = client.send_email_otp(dry_run=False)
     print(status, body)
 
 

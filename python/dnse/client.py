@@ -11,7 +11,7 @@ class DNSEClient:
         self,
         api_key,
         api_secret,
-        base_url="http://localhost:8080",
+        base_url="https://openapi.dnse.com.vn",
         algorithm="hmac-sha256",
         hmac_nonce_enabled=True,
     ):
@@ -68,6 +68,32 @@ class DNSEClient:
             dry_run=dry_run,
         )
 
+    def get_order_history(
+        self,
+        account_no,
+        market_type,
+        from_date=None,
+        to_date=None,
+        page_size=None,
+        page_index=None,
+        dry_run=False,
+    ):
+        query = {"marketType": market_type}
+        if from_date:
+            query["from"] = from_date
+        if to_date:
+            query["to"] = to_date
+        if page_size is not None:
+            query["pageSize"] = page_size
+        if page_index is not None:
+            query["pageIndex"] = page_index
+        return self._request(
+            "GET",
+            f"/accounts/{account_no}/orders/history",
+            query=query,
+            dry_run=dry_run,
+        )
+
     def get_ppse(self, account_no, market_type, symbol, price, loan_package_id, dry_run=False):
         return self._request(
             "GET",
@@ -100,6 +126,29 @@ class DNSEClient:
         return self._request(
             "POST",
             "/accounts/orders",
+            query=query,
+            body=payload,
+            headers=headers,
+            dry_run=dry_run,
+        )
+
+    def put_order(
+        self,
+        account_no,
+        order_id,
+        market_type,
+        payload,
+        trading_token,
+        order_category=None,
+        dry_run=False,
+    ):
+        headers = {"trading-token": trading_token}
+        query = {"marketType": market_type}
+        if order_category:
+            query["orderCategory"] = order_category
+        return self._request(
+            "PUT",
+            f"/accounts/{account_no}/orders/{order_id}",
             query=query,
             body=payload,
             headers=headers,

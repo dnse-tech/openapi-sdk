@@ -9,7 +9,13 @@ async function main() {
     baseUrl: 'https://openapi.dnse.com.vn',
   });
 
-  const { status, body } = await client.getBalances('0001000115', { dryRun: false });
+  const { status, body } = await client.getOrderHistory('0001000115', 'STOCK', {
+    from: '2025-12-01',
+    to: '2025-12-09',
+    pageSize: 20,
+    pageIndex: 1,
+    dryRun: false,
+  });
   console.log(status, body);
 }
 

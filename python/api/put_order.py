@@ -11,12 +11,21 @@ def main():
     client = DNSEClient(
         api_key="replace-with-api-key",
         api_secret="replace-with-api-secret",
-        base_url="http://localhost:8080",
+        base_url="https://openapi.dnse.com.vn",
     )
 
-    status, body = client.create_trading_token(
-        otp_type="email_otp",
-        passcode="666666",
+    payload = {
+        "price": 12500,
+        "quantity": 100,
+    }
+
+    status, body = client.put_order(
+        account_no="0001000115",
+        order_id="511",
+        market_type="STOCK",
+        payload=payload,
+        trading_token="replace-with-trading-token",
+        order_category="NORMAL",
         dry_run=False,
     )
     print(status, body)

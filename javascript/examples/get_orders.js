@@ -6,7 +6,7 @@ async function main() {
   const client = new DNSEClient({
     apiKey: 'replace-with-api-key',
     apiSecret: 'replace-with-api-secret',
-    baseUrl: 'http://localhost:8080',
+    baseUrl: 'https://openapi.dnse.com.vn',
   });
 
   const { status, body } = await client.getOrders('0001000115', 'STOCK', {

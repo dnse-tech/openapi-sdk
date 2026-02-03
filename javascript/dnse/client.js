@@ -4,7 +4,7 @@ const { randomUUID } = require('crypto');
 const { buildSignature, formatDateHeader } = require('./common');
 
 class DNSEClient {
-  constructor({ apiKey, apiSecret, baseUrl = 'http://localhost:8080', algorithm = 'hmac-sha256', hmacNonceEnabled = true }) {
+  constructor({ apiKey, apiSecret, baseUrl = 'https://openapi.dnse.com.vn', algorithm = 'hmac-sha256', hmacNonceEnabled = true }) {
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
     this.baseUrl = baseUrl.replace(/\/$/, '');
@@ -49,6 +49,30 @@ class DNSEClient {
     });
   }
 
+  getOrderHistory(
+    accountNo,
+    marketType,
+    { from, to, pageSize, pageIndex, dryRun = false } = {},
+  ) {
+    const query = { marketType };
+    if (from !== undefined) {
+      query.from = from;
+    }
+    if (to !== undefined) {
+      query.to = to;
+    }
+    if (pageSize !== undefined) {
+      query.pageSize = pageSize;
+    }
+    if (pageIndex !== undefined) {
+      query.pageIndex = pageIndex;
+    }
+    return this.#request('GET', `/accounts/${accountNo}/orders/history`, {
+      query,
+      dryRun,
+    });
+  }
+
   getPpse(accountNo, marketType, symbol, price, loanPackageId, { dryRun = false } = {}) {
     return this.#request('GET', `/accounts/${accountNo}/ppse`, {
       query: {
@@ -70,6 +94,15 @@ class DNSEClient {
 
   postOrder(marketType, payload, tradingToken, { dryRun = false } = {}) {
     return this.#request('POST', '/accounts/orders', {
+      query: { marketType },
+      body: payload,
+      headers: { 'trading-token': tradingToken },
+      dryRun,
+    });
+  }
+
+  putOrder(accountNo, orderId, marketType, payload, tradingToken, { dryRun = false } = {}) {
+    return this.#request('PUT', `/accounts/${accountNo}/orders/${orderId}`, {
       query: { marketType },
       body: payload,
       headers: { 'trading-token': tradingToken },

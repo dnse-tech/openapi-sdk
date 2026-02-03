@@ -16,9 +16,9 @@ async def main():
     # Initialize client
     encoding = "msgpack"  # json or msgpack
     client = TradingClient(
-        api_key="api_key",
-        api_secret="api_scret",
-        base_url="wss://ws-openapi.dnse.com.vn",
+        api_key="api-key",
+        api_secret="api-secret",
+        base_url="wss://ws-openapi-uat.dnse.com.vn",
         encoding=encoding,
     )
 
