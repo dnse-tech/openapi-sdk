@@ -17,7 +17,7 @@ import time
 from .connection import WebSocketConnection
 from .auth import AuthManager
 from .encoding import MessageEncoder, MessageDecoder
-from .models import Trade, Quote, Bar, Order, Position, AccountUpdate, ExpectedPrice, SecurityDefinition, TradeExtra
+from .models import Trade, Quote, Ohlc, Order, Position, AccountUpdate, ExpectedPrice, SecurityDefinition, TradeExtra
 from .exceptions import (
     AuthenticationError,
     ConnectionError,
@@ -26,6 +26,13 @@ from .exceptions import (
 )
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 
 class TradingClient:
@@ -223,19 +230,19 @@ class TradingClient:
         if on_quote:
             self.on("quote", on_quote)
 
-    async def subscribe_bars(
+    async def subscribe_ohlc(
             self,
             symbols: List[str],
             resolution: str = "1m",
-            on_bar: Optional[Callable[[Bar], None]] = None, encoding="json"
+            on_ohlc: Optional[Callable[[Ohlc], None]] = None, encoding="json"
     ) -> None:
         channel = "ohlc." + resolution + ".json"
         if encoding == "msgpack":
             channel = "ohlc." + resolution + ".msgpack"
         await self._subscribe_channel(channel, symbols)
 
-        if on_bar:
-            self.on("bar", on_bar)
+        if on_ohlc:
+            self.on("ohlc", on_ohlc)
 
     async def subscribe_orders(
             self, on_order: Optional[Callable[[Order], None]] = None
@@ -309,19 +316,35 @@ class TradingClient:
         self._event_handlers[event].append(handler)
 
     async def _message_handler(self) -> None:
+        reconnect_attempt = 0
+        max_reconnect_delay = 60  # Maximum delay between reconnection attempts
+
         while self._is_running:
             try:
                 async for message in self._connection:
                     data = self._decoder.decode(message)
                     await self._dispatch_message(data)
+                    # Reset reconnect attempt counter on successful message
+                    reconnect_attempt = 0
             except ConnectionClosed as e:
                 logger.warning(f"Connection closed: {e}")
 
                 # Handle reconnection if enabled and error is recoverable
                 if self.auto_reconnect and e.recoverable:
-                    logger.info("Attempting to reconnect...")
+                    reconnect_attempt += 1
+                    logger.info(f"Attempting to reconnect (attempt {reconnect_attempt}/{self.max_retries})...")
+
+                    # Emit reconnecting event
+                    self._emit("reconnecting", {
+                        "attempt": reconnect_attempt,
+                        "max_retries": self.max_retries,
+                        "delay": 0,
+                        "error": str(e),
+                    })
+
                     try:
                         await self._handle_reconnection()
+                        reconnect_attempt = 0
                     except Exception as reconnect_error:
                         logger.error(f"Reconnection failed: {reconnect_error}")
                         self._emit("error", reconnect_error)
@@ -337,6 +360,90 @@ class TradingClient:
                 if not self.auto_reconnect:
                     break
 
+                # Check if this is a connection-related error
+                if self._is_connection_error(e):
+                    reconnect_attempt += 1
+
+                    if reconnect_attempt > self.max_retries:
+                        logger.error(f"Max reconnection attempts ({self.max_retries}) exceeded")
+                        self._emit("max_reconnect_exceeded", reconnect_attempt)
+                        break
+
+                    # Exponential backoff: 1s, 2s, 4s, 8s, ... up to max_reconnect_delay
+                    delay = min(2 ** (reconnect_attempt - 1), max_reconnect_delay)
+                    logger.info(f"Connection error detected. Reconnecting in {delay}s (attempt {reconnect_attempt}/{self.max_retries})...")
+
+                    # Emit reconnecting event for user tracking
+                    self._emit("reconnecting", {
+                        "attempt": reconnect_attempt,
+                        "max_retries": self.max_retries,
+                        "delay": delay,
+                        "error": str(e),
+                    })
+
+                    await asyncio.sleep(delay)
+
+                    try:
+                        await self._handle_reconnection()
+                        logger.info("Reconnection successful after connection error")
+                        reconnect_attempt = 0
+                    except Exception as reconnect_error:
+                        logger.error(f"Reconnection failed: {reconnect_error}")
+                        # Continue loop to retry with increased backoff
+                        continue
+                else:
+                    # Non-connection error, don't retry
+                    logger.error(f"Non-recoverable error: {e}")
+                    break
+
+    def _is_connection_error(self, error: Exception) -> bool:
+        """
+        Check if an exception is related to connection issues.
+
+        Args:
+            error: The exception to check
+
+        Returns:
+            True if the error is connection-related and potentially recoverable
+        """
+        import websockets.exceptions
+
+        # Connection-related exception types
+        connection_error_types = (
+            ConnectionError,  # Our custom ConnectionError
+            OSError,  # Network-level errors (includes socket errors)
+            ConnectionResetError,
+            ConnectionRefusedError,
+            ConnectionAbortedError,
+            BrokenPipeError,
+            TimeoutError,
+            asyncio.TimeoutError,
+            websockets.exceptions.WebSocketException,
+            websockets.exceptions.ConnectionClosed,
+            websockets.exceptions.ConnectionClosedError,
+            websockets.exceptions.ConnectionClosedOK,
+        )
+
+        if isinstance(error, connection_error_types):
+            return True
+
+        # Check error message for common connection-related patterns
+        error_msg = str(error).lower()
+        connection_keywords = [
+            'connection',
+            'network',
+            'socket',
+            'timeout',
+            'reset',
+            'refused',
+            'closed',
+            'broken pipe',
+            'eof',
+            'disconnect',
+        ]
+
+        return any(keyword in error_msg for keyword in connection_keywords)
+
     async def _dispatch_message(self, data: Dict[str, Any]) -> None:
         """
         Route message to appropriate handler.
@@ -349,10 +456,15 @@ class TradingClient:
 
         if action == "subscribed":
             logger.debug(f"Subscription confirmed: {data}")
+        elif action == "ping":
+            # Server sent ping, respond with pong
+            logger.info("Received ping from server, sending pong")
+            pong_msg = self._encoder.encode({"action": "pong"})
+            await self._connection.send(pong_msg)
         elif action == "pong":
             # Update pong timestamp for health monitoring
             self._last_pong_time = time.time()
-            logger.debug("Received pong")
+            # logger.info("Received pong")
         elif action == "error":
             error_msg = data.get("message") or data.get("msg")
             logger.error(f"Server error: {error_msg}")
@@ -377,10 +489,10 @@ class TradingClient:
             quote = Quote.from_dict(data)
             self._emit("quote", quote)
             await self._message_queue.put(quote)
-        elif msg_type == "b":  # Bar
-            bar = Bar.from_dict(data)
-            self._emit("bar", bar)
-            await self._message_queue.put(bar)
+        elif msg_type == "b":  # ohlc
+            ohlc = Ohlc.from_dict(data)
+            self._emit("ohlc", ohlc)
+            await self._message_queue.put(ohlc)
         elif msg_type == "o":  # Order
             order = Order.from_dict(data)
             self._emit("order", order)

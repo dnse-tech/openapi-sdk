@@ -7,7 +7,13 @@ from websockets.client import WebSocketClientProtocol
 from .exceptions import ConnectionError, ConnectionClosed
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 class WebSocketConnection:
     """
@@ -62,9 +68,12 @@ class WebSocketConnection:
                 ssl_context.check_hostname = False
                 ssl_context.verify_mode = ssl.CERT_NONE
                 self._ws = await asyncio.wait_for(
-                    websockets.connect(self.url, ssl=ssl_context),
-                    timeout=self.timeout
-                )
+                    websockets.connect(self.url,
+                                       ssl=ssl_context,
+                                       ping_interval=30,
+                                       ping_timeout=30,
+                                       close_timeout=10,
+                                       max_queue=None), timeout=self.timeout)
 
                 self._is_connected = True
                 self._retry_count = 0

@@ -8,8 +8,9 @@ This example shows how to receive real-time market data for multiple symbols.
 """
 
 import asyncio
+
 from trading_websocket import TradingClient
-from trading_websocket.models import Trade, Quote, Bar, ExpectedPrice, TradeExtra, SecurityDefinition
+from trading_websocket.models import Trade
 
 
 async def main():
@@ -18,7 +19,7 @@ async def main():
     client = TradingClient(
         api_key="api-key",
         api_secret="api-secret",
-        base_url="wss://ws-openapi-uat.dnse.com.vn",
+        base_url="wss://ws-openapi.dnse.com.vn",
         encoding=encoding,
     )
 
@@ -35,9 +36,9 @@ async def main():
 
     print("\nReceiving market data (will run for 1 hour)...\n")
 
-    # Run for 1H to collect data
+    # Run for 8H to collect data
     # In a real application, you might run indefinitely or until a specific condition
-    await asyncio.sleep(60 * 60)
+    await asyncio.sleep(8 * 60 * 60)
 
     # Disconnect gracefully
     print("\n\nDisconnecting...")

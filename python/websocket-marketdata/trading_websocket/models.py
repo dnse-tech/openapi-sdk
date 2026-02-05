@@ -1,7 +1,7 @@
 """Data models for market data and private channel updates.
 
 This module provides typed data models for all message types:
-- Market data: Trade, Quote, Bar
+- Market data: Trade, Quote, OHLC, ExpectedPrice, TradeExtra, SecurityDefinition
 - Private channels: Order, Position, AccountUpdate
 
 All models support parsing from both abbreviated (MessagePack) and full (JSON) field names.
@@ -125,7 +125,6 @@ class SecurityDefinition:
     boardId: int
     symbol: str
     isin: str
-    productId: str
     productGrpId: int
     securityGroupId: int
     basicPrice: float
@@ -144,7 +143,6 @@ class SecurityDefinition:
             marketId=data.get("market_id", 0) or data.get("mi", 0),
             boardId=data.get("board_id", 0) or data.get("bi", 0),
             isin=data.get("isin", 0) or data.get("is", 0),
-            productId=data.get("product_id") or data.get("pi"),
             productGrpId=data.get("product_grp_id", 0) or data.get("pgi", 0),
             securityGroupId=data.get("security_group_id", 0) or data.get("sgi", 0),
             basicPrice=data.get("basic_price", 0.0) or data.get("bp", 0.0),
@@ -212,7 +210,7 @@ class Quote:
 
 
 @dataclass
-class Bar:
+class Ohlc:
     symbol: str
     resolution: int
     open: Decimal
@@ -221,9 +219,11 @@ class Bar:
     close: Decimal
     volume: int
     time: int
+    lastUpdated: int
+    type: str
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Bar":
+    def from_dict(cls, data: Dict[str, Any]) -> "Ohlc":
         return cls(
             symbol=data.get("s") or data.get("symbol"),
             resolution=data.get("r") or data.get("resolution"),
@@ -233,6 +233,8 @@ class Bar:
             close=data.get("c") or data.get("close"),
             volume=data.get("v") or data.get("volume"),
             time=data.get("t") or data.get("time"),
+            type=data.get("ty") or data.get("type"),
+            lastUpdated=data.get("lu") or data.get("lastUpdated")
         )
 
 
