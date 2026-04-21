@@ -14,7 +14,7 @@ def main():
         base_url="https://openapi.dnse.com.vn",
     )
 
-    status, body = client.get_list_care_by(account_no="", dry_run=False)
+    status, body = client.get_list_care_by(dry_run=False)
     print(status, body)
 
 

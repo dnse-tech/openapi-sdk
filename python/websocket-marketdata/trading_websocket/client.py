@@ -38,18 +38,19 @@ if not logger.handlers:
 DEFAULT_BOARDS = ["G1", "G3", "G4", "G7", "T1", "T2", "T3", "T4", "T6"]
 
 _MSG_TYPE_MAP = {
-    "t": ("trade", Trade),
-    "te": ("trade_extra", TradeExtra),
-    "e": ("expected_price", ExpectedPrice),
-    "sd": ("security_definition", SecurityDefinition),
-    "q": ("quote", Quote),
-    "b": ("ohlc", Ohlc),
-    "bc": ("ohlc_closed", Ohlc),
-    "o": ("order", Order),
-    "p": ("position", Position),
-    "mi": ("market_index", MarketIndex),
-    "a":  ("account", AccountUpdate),
-    "f": ("foreign", ForeignInvestor),
+    "t": ("trade", Trade, None),
+    "te": ("trade_extra", TradeExtra, None),
+    "e": ("expected_price", ExpectedPrice, None),
+    "sd": ("security_definition", SecurityDefinition, None),
+    "q": ("quote", Quote, None),
+    "b": ("ohlc", Ohlc, None),
+    "bc": ("ohlc_closed", Ohlc, None),
+    "do": ("order_event", Order, "order"),
+    "eo": ("order_event", Order, "order"),
+    "p": ("position", Position, None),
+    "mi": ("market_index", MarketIndex, None),
+    "a": ("account", AccountUpdate, None),
+    "f": ("foreign", ForeignInvestor, None),
 }
 
 
@@ -252,6 +253,17 @@ class TradingClient:
         if on_expected_price:
             _handler = self._make_filtered_handler(board_id, "boardId", on_expected_price) if board_id is not None else on_expected_price
             self.on("expected_price", _handler)
+
+    async def subscribe_order_event(
+            self, market_type="STOCK",
+            on_order_event: Optional[Callable[[Order], None]] = None,
+            encoding="json"
+    ) -> None:
+        channel = f"order.{market_type}.{encoding}"
+        await self._subscribe_channel(channel, [])
+
+        if on_order_event:
+            self.on("order_event", on_order_event)
 
     async def subscribe_sec_def(
             self, symbols: List[str], on_sec_def: Optional[Callable[[SecurityDefinition], None]] = None,
@@ -591,8 +603,12 @@ class TradingClient:
             logger.error(f"Server error: {error_msg}")
             self._emit("error", Exception(error_msg))
         elif msg_type in _MSG_TYPE_MAP:
-            event, model_cls = _MSG_TYPE_MAP[msg_type]
-            obj = model_cls.from_dict(data)
+            event, model_cls, field = _MSG_TYPE_MAP[msg_type]
+            if field is not None and field != "":
+                obj = model_cls.from_dict(data[field])
+                obj.receivedAt = data["_receivedAt"]
+            else:
+                obj = model_cls.from_dict(data)
             self._emit(event, obj)
             # Only push to queue if no callback registered (using async iterator)
             if event not in self._event_handlers:

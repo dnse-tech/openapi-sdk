@@ -311,6 +311,63 @@ class SecurityDefinition:
 
 
 @dataclass
+class Order:
+    id: str
+    side: str
+    accountNo: str
+    symbol: str
+
+    price: float
+    priceSecure: float
+    averagePrice: float
+
+    quantity: int
+    fillQuantity: int
+    canceledQuantity: int
+    leaveQuantity: int
+
+    orderType: str
+    orderStatus: str
+
+    loanPackageId: int
+    marketType: str
+
+    transDate: str
+    createdDate: str
+    modifiedDate: str
+    receivedAt: Optional[float] = field(default=None, repr=False)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Order":
+        return cls(
+            id=data.get("id"),
+            side=data.get("side"),
+            accountNo=data.get("accountNo"),
+            symbol=data.get("symbol"),
+
+            price=float(data.get("price")),
+            priceSecure=float(data.get("priceSecure")),
+            averagePrice=float(data.get("averagePrice")),
+
+            quantity=int(data.get("quantity")),
+            fillQuantity=int(data.get("fillQuantity")),
+            canceledQuantity=int(data.get("canceledQuantity")),
+            leaveQuantity=int(data.get("leaveQuantity")),
+
+            orderType=data.get("orderType"),
+            orderStatus=data.get("orderStatus"),
+
+            loanPackageId=int(data.get("loanPackageId")),
+            marketType=data.get("marketType"),
+
+            transDate=data.get("transDate"),
+            createdDate=data.get("createdDate"),
+            modifiedDate=data.get("modifiedDate"),
+            receivedAt=data.get("_receivedAt"),
+        )
+
+
+@dataclass
 class Quote:
     marketId: str
     boardId: str
@@ -399,80 +456,6 @@ class Ohlc:
             type=data.get("type"),
             lastUpdated=data.get("lastUpdated"),
             receivedAt=data.get("_receivedAt"),
-        )
-
-
-@dataclass
-class Order:
-    id: str
-    side: str
-    accountNo: str
-    symbol: str
-
-    price: float
-    priceSecure: float
-    averagePrice: float
-
-    quantity: int
-    fillQuantity: int
-    canceledQuantity: int
-    leaveQuantity: int
-
-    orderType: str
-    orderStatus: str
-
-    loanPackageId: int
-    marketType: str
-
-    transDate: str
-    createdDate: str
-    modifiedDate: str
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Order":
-        return cls(
-            id=data.get("id"),
-            side=data.get("side"),
-            accountNo=data.get("accountNo") or data.get("account_no"),
-            symbol=data.get("symbol") or data.get("s"),
-
-            price=float(data.get("price", 0.0)),
-            priceSecure=float(data.get("priceSecure", 0.0)),
-            averagePrice=float(data.get("averagePrice", 0.0)),
-
-            quantity=int(data.get("quantity", 0)),
-            fillQuantity=int(data.get("fillQuantity", 0)),
-            canceledQuantity=int(data.get("canceledQuantity", 0)),
-            leaveQuantity=int(data.get("leaveQuantity", 0)),
-
-            orderType=data.get("orderType"),
-            orderStatus=data.get("orderStatus"),
-
-            loanPackageId=int(data.get("loanPackageId", 0)),
-            marketType=data.get("marketType"),
-
-            transDate=data.get("transDate"),
-            createdDate=data.get("createdDate"),
-            modifiedDate=data.get("modifiedDate"),
-        )
-
-
-@dataclass
-class Session:
-    marketId: int
-    boardId: int
-    eventId: int
-    tradingSessionId: int
-    tscProdGrpId: int
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Session":
-        return cls(
-            marketId=data.get("marketId", 0),
-            boardId=data.get("boardId", 0),
-            eventId=data.get("eventId", 0),
-            tradingSessionId=data.get("tradingSessionId", 0),
-            tscProdGrpId=data.get("tscProdGrpId", 0),
         )
 
 

@@ -230,14 +230,10 @@ class DNSEClient:
             dry_run=dry_run,
         )
 
-    def get_list_care_by(self, account_no=None, dry_run=False):
-        query = {}
-        if account_no is not None:
-            query["accountNo"] = account_no
+    def get_list_care_by(self, dry_run=False):
         return self._request(
             "GET",
             f"/brokers/accounts/care-by",
-            query=query if query else None,
             dry_run=dry_run,
         )
 
