@@ -9,8 +9,8 @@ This example shows how to receive real-time market data for multiple symbols.
 
 import asyncio
 from datetime import datetime
-from trading_websocket import TradingClient
-import trading_websocket.models
+from dnse import TradingClient
+from dnse.websocket.models import TradeExtra
 
 
 async def main():
@@ -23,7 +23,7 @@ async def main():
         encoding=encoding,
     )
 
-    def handle_trade_extra(trade: trading_websocket.models.TradeExtra):
+    def handle_trade_extra(trade: TradeExtra):
         received_at = datetime.fromtimestamp(trade.receivedAt).strftime("%H:%M:%S.%f")[:-3] if trade.receivedAt else "N/A"
         print(f"[{received_at}] TRADE EXTRA: {trade}")
 

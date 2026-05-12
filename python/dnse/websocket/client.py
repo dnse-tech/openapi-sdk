@@ -10,21 +10,22 @@ This module provides the main TradingClient class that handles:
 - Graceful shutdown
 """
 
-from typing import Optional, Callable, List, Dict, Any
 import asyncio
 import logging
 import time
-from .connection import WebSocketConnection
+from typing import Optional, Callable, List, Dict, Any
+
 from .auth import AuthManager
+from .connection import WebSocketConnection
 from .encoding import MessageEncoder, MessageDecoder
-from .models import Trade, Quote, Ohlc, Order, Position, AccountUpdate, ExpectedPrice, SecurityDefinition, TradeExtra, \
-    MarketIndex, ForeignInvestor
 from .exceptions import (
     AuthenticationError,
     ConnectionError,
     SubscriptionError,
     ConnectionClosed,
 )
+from .models import Trade, Quote, Ohlc, Order, AccountUpdate, ExpectedPrice, SecurityDefinition, TradeExtra, \
+    MarketIndex, ForeignInvestor, Position
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -47,7 +48,8 @@ _MSG_TYPE_MAP = {
     "bc": ("ohlc_closed", Ohlc, None),
     "do": ("order_event", Order, "order"),
     "eo": ("order_event", Order, "order"),
-    "p": ("position", Position, None),
+    "dp": ("position_event", Position, "position"),
+    "ep": ("position_event", Position, "position"),
     "mi": ("market_index", MarketIndex, None),
     "a": ("account", AccountUpdate, None),
     "f": ("foreign", ForeignInvestor, None),
@@ -235,7 +237,8 @@ class TradingClient:
             await self._subscribe_channel(channel, symbols)
 
         if on_trade_extra:
-            _handler = self._make_filtered_handler(board_id, "boardId", on_trade_extra) if board_id is not None else on_trade_extra
+            _handler = self._make_filtered_handler(board_id, "boardId",
+                                                   on_trade_extra) if board_id is not None else on_trade_extra
             self.on("trade_extra", _handler)
 
     async def subscribe_expected_price(
@@ -251,7 +254,8 @@ class TradingClient:
             await self._subscribe_channel(channel, symbols)
 
         if on_expected_price:
-            _handler = self._make_filtered_handler(board_id, "boardId", on_expected_price) if board_id is not None else on_expected_price
+            _handler = self._make_filtered_handler(board_id, "boardId",
+                                                   on_expected_price) if board_id is not None else on_expected_price
             self.on("expected_price", _handler)
 
     async def subscribe_order_event(
@@ -264,6 +268,17 @@ class TradingClient:
 
         if on_order_event:
             self.on("order_event", on_order_event)
+
+    async def subscribe_position_event(
+            self, market_type="STOCK",
+            on_position_event: Optional[Callable[[Position], None]] = None,
+            encoding="json"
+    ) -> None:
+        channel = f"position.{market_type}.{encoding}"
+        await self._subscribe_channel(channel, [])
+
+        if on_position_event:
+            self.on("position_event", on_position_event)
 
     async def subscribe_sec_def(
             self, symbols: List[str], on_sec_def: Optional[Callable[[SecurityDefinition], None]] = None,
@@ -278,7 +293,8 @@ class TradingClient:
             await self._subscribe_channel(channel, symbols)
 
         if on_sec_def:
-            _handler = self._make_filtered_handler(board_id, "boardId", on_sec_def) if board_id is not None else on_sec_def
+            _handler = self._make_filtered_handler(board_id, "boardId",
+                                                   on_sec_def) if board_id is not None else on_sec_def
             self.on("security_definition", _handler)
 
     async def subscribe_market_index(
@@ -433,9 +449,11 @@ class TradingClient:
 
     def _make_filtered_handler(self, board_id: Optional[str], attr: str, handler: Callable) -> Callable:
         """Wrap handler to only fire when obj.{attr} == board_id."""
+
         def _filtered(obj, _b=board_id, _a=attr, _cb=handler):
             if getattr(obj, _a, None) == _b:
                 _cb(obj)
+
         return _filtered
 
     def on(self, event: str, handler: Callable) -> None:
@@ -501,7 +519,8 @@ class TradingClient:
                         break
 
                     delay = min(2 ** (reconnect_attempt - 1), max_reconnect_delay)
-                    logger.info(f"Connection error detected. Reconnecting in {delay}s (attempt {reconnect_attempt}/{self.max_retries})...")
+                    logger.info(
+                        f"Connection error detected. Reconnecting in {delay}s (attempt {reconnect_attempt}/{self.max_retries})...")
 
                     self._emit("reconnecting", {
                         "attempt": reconnect_attempt,

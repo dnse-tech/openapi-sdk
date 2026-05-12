@@ -8,8 +8,8 @@ This example shows how to receive real-time quote data for multiple symbols.
 import asyncio
 from datetime import datetime
 
-from trading_websocket import TradingClient
-from trading_websocket.models import Quote
+from dnse import TradingClient
+from dnse.websocket.models import Quote
 
 
 async def main():

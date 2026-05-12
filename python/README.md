@@ -44,11 +44,14 @@ client = DNSEClient(
     api_key="your_api_key",
     api_secret="your_api_secret",
     base_url="https://openapi.dnse.com.vn",
+    api_version="2026-05-07",
 )
 
 status, body = client.get_accounts(dry_run=False)
 print(status, body)
 ```
+
+The SDK sends the API version in the `version` header. If `api_version` is omitted, it defaults to `2026-01-01`; it can also be set with the `DNSE_API_VERSION` environment variable.
 
 ### Dry Run
 

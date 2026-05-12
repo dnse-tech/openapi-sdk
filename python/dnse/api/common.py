@@ -8,9 +8,15 @@ from datetime import datetime, timezone
 from urllib import parse, request
 from uuid import uuid4
 
+DEFAULT_API_VERSION = "2026-05-07"
+
 
 def get_date_header_name():
     return os.getenv("DATE_HEADER", "Date")
+
+
+def get_api_version():
+    return os.getenv("DNSE_API_VERSION") or DEFAULT_API_VERSION
 
 
 def build_signature(secret, method, path, date_value, algorithm, nonce=None, header_name=None):
@@ -50,6 +56,8 @@ def send_signed_request(
     hmac_nonce_enabled=True,
 ):
     debug = os.getenv("DEBUG", "").lower() == "true"
+    headers = dict(headers or {})
+    headers.setdefault("version", get_api_version())
     parsed = parse.urlparse(url)
     path = parsed.path
     date_value = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")

@@ -9,8 +9,8 @@ This example shows how to receive real-time market index
 
 import asyncio
 
-from trading_websocket import TradingClient
-from trading_websocket.models import MarketIndex
+from dnse import TradingClient
+from dnse.websocket.models import MarketIndex
 from datetime import datetime
 
 

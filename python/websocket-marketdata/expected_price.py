@@ -10,8 +10,8 @@ This example shows how to receive real-time market data for multiple symbols.
 import asyncio
 from datetime import datetime
 
-from trading_websocket import TradingClient
-from trading_websocket.models import ExpectedPrice
+from dnse import TradingClient
+from dnse.websocket.models import ExpectedPrice
 
 
 async def main():

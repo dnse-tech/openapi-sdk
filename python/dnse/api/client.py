@@ -5,7 +5,7 @@ from urllib import parse
 import urllib3
 
 
-from .common import build_signature, get_date_header_name
+from .common import build_signature, get_api_version, get_date_header_name
 
 
 class DNSEClient:
@@ -16,12 +16,14 @@ class DNSEClient:
             base_url="https://openapi.dnse.com.vn",
             algorithm="hmac-sha256",
             hmac_nonce_enabled=True,
+            api_version=None,
     ):
         self._api_key = api_key
         self._api_secret = api_secret
         self._base_url = base_url.rstrip("/")
         self._algorithm = algorithm
         self._hmac_nonce_enabled = hmac_nonce_enabled
+        self._api_version = api_version or get_api_version()
 
         # Tạo PoolManager 1 lần duy nhất, tái sử dụng suốt vòng đời object
         self._http = urllib3.PoolManager(
@@ -332,6 +334,7 @@ class DNSEClient:
             date_header_name: date_value,
             "X-Signature": signature_header_value,
             "x-api-key": self._api_key,
+            "version": self._api_version,
         }
 
         if body is not None:

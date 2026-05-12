@@ -7,8 +7,8 @@ This example shows how to receive real-time order event for stock and derivative
 import asyncio
 from datetime import datetime
 
-from trading_websocket import TradingClient
-from trading_websocket.models import Order
+from dnse import TradingClient
+from dnse.websocket.models import Order
 
 
 async def main():
