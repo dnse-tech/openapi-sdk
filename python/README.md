@@ -27,11 +27,23 @@ and investment applications.
 
 #### Install from PyPI
 
+The package on PyPI is **`dnse-sdk-openapi`** (there is no package named `openapi-sdk`):
+
 ```console
-pip install openapi-sdk 
+pip install dnse-sdk-openapi
 ```
 
-Upgrade
+For WebSocket examples that use MessagePack encoding ([`websocket-marketdata/`](websocket-marketdata)):
+
+```console
+pip install dnse-sdk-openapi msgpack
+```
+
+Upgrade:
+
+```console
+pip install -U dnse-sdk-openapi
+```
 
 ### Usage
 
