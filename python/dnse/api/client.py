@@ -231,6 +231,27 @@ class DNSEClient:
             dry_run=dry_run,
         )
 
+    def get_foreign_trading(self, symbol, board_id=None, from_date=None, to_date=None, limit=None, order = None, next_page_token=None, dry_run=False):
+        query = {}
+        if board_id is not None:
+            query["boardId"] = board_id
+        if from_date is not None:
+            query["from"] = from_date
+        if to_date is not None:
+            query["to"] = to_date
+        if limit is not None:
+            query["limit"] = limit
+        if order is not None:
+            query["order"] = order
+        if next_page_token is not None:
+            query["nextPageToken"] = next_page_token
+        return self._request(
+            "GET",
+            f"/price/{symbol}/foreign-trading",
+            query=query if query else None,
+            dry_run=dry_run,
+        )
+
     def get_instruments(self, symbol=None, market_id=None, security_group_id=None, index_name=None, limit=None, page=None, dry_run=False):
         query = {}
         if symbol is not None:
