@@ -54,7 +54,6 @@ def parse_timestamp(v: Any, date_only: bool = False) -> Optional[str]:
     except Exception:
         return None
 
-
 @dataclass
 class PriceLevel:
     price: float
@@ -586,120 +585,6 @@ class Session:
             tradingSessionId=data.get("tradingSessionId", 0),
             tscProdGrpId=data.get("tscProdGrpId", ""),
             receivedAt=data.get("_receivedAt")
-        )
-
-
-@dataclass
-class Order:
-    id: str
-    side: str
-    accountNo: str
-    symbol: str
-
-    price: float
-    priceSecure: float
-    averagePrice: float
-
-    quantity: int
-    fillQuantity: int
-    canceledQuantity: int
-    leaveQuantity: int
-
-    orderType: str
-    orderStatus: str
-
-    loanPackageId: int
-    marketType: str
-
-    transDate: str
-    createdDate: str
-    modifiedDate: str
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Order":
-        return cls(
-            id=data.get("id"),
-            side=data.get("side"),
-            accountNo=data.get("accountNo") or data.get("account_no"),
-            symbol=data.get("symbol") or data.get("s"),
-
-            price=float(data.get("price", 0.0)),
-            priceSecure=float(data.get("priceSecure", 0.0)),
-            averagePrice=float(data.get("averagePrice", 0.0)),
-
-            quantity=int(data.get("quantity", 0)),
-            fillQuantity=int(data.get("fillQuantity", 0)),
-            canceledQuantity=int(data.get("canceledQuantity", 0)),
-            leaveQuantity=int(data.get("leaveQuantity", 0)),
-
-            orderType=data.get("orderType"),
-            orderStatus=data.get("orderStatus"),
-
-            loanPackageId=int(data.get("loanPackageId", 0)),
-            marketType=data.get("marketType"),
-
-            transDate=data.get("transDate"),
-            createdDate=data.get("createdDate"),
-            modifiedDate=data.get("modifiedDate"),
-        )
-
-
-@dataclass
-class Session:
-    marketId: str
-    boardId: str
-    eventId: str
-    tradingSessionId: int
-    tscProdGrpId: str
-    time: Optional[str] = None
-    receivedAt: Optional[float] = field(default=None, repr=False)
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Session":
-        return cls(
-            marketId=data.get("marketId", ""),
-            boardId=data.get("boardId", ""),
-            eventId=data.get("eventId", ""),
-            tradingSessionId=data.get("tradingSessionId", 0),
-            tscProdGrpId=data.get("tscProdGrpId", ""),
-            time=parse_timestamp(data.get("sendingTime")),
-            receivedAt=data.get("_receivedAt"),
-        )
-
-
-@dataclass
-class Position:
-    symbol: str
-    quantity: int
-    averagePrice: Decimal
-    marketValue: Decimal
-    costBasis: Decimal
-    unrealizedPl: Decimal
-    unrealizedPlPercent: Decimal
-    timestamp: datetime
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Position":
-        """Parse position from message data.
-
-        Args:
-            data: Raw message dict with either abbreviated or full field names
-
-        Returns:
-            Position instance
-
-        Example:
-            >>> Position.from_dict({"S": "AAPL", "q": 100, "ap": "150.00", ...})
-        """
-        return cls(
-            symbol=data.get("symbol"),
-            quantity=data.get("quantity"),
-            averagePrice=Decimal(str(data.get("averagePrice"))),
-            marketValue=Decimal(str(data.get("marketValue"))),
-            costBasis=Decimal(str(data.get("costBasis"))),
-            unrealizedPl=Decimal(str(data.get("unrealizedPl"))),
-            unrealizedPlPercent=Decimal(str(data.get("unrealizedPlPercent"))),
-            timestamp=datetime.fromtimestamp((data.get("timestamp")) / 1000),
         )
 
 
