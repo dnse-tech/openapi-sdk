@@ -54,6 +54,7 @@ def parse_timestamp(v: Any, date_only: bool = False) -> Optional[str]:
     except Exception:
         return None
 
+
 @dataclass
 class PriceLevel:
     price: float
@@ -293,6 +294,50 @@ class EstimatedMarketIndex:
             totalVolumeTraded=data.get("totalVolumeTraded"),
             receivedAt=data.get("_receivedAt"),
             time=data.get("time"),
+        )
+
+
+@dataclass
+class IndexInfluenceItem:
+    time: Optional[str]
+    symbol: str
+    influence: float
+    influenceRatio: float
+    proportion: float
+    changeRatio: float
+    changeValue: float
+    price: float
+    grossTradeAmount: float
+    totalVolumeTraded: float
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "IndexInfluenceItem":
+        return cls(
+            time=data.get("time"),
+            symbol=data.get("symbol"),
+            influence=data.get("influence"),
+            influenceRatio=data.get("influenceRatio"),
+            proportion=data.get("proportion"),
+            changeRatio=data.get("changeRatio"),
+            changeValue=data.get("changeValue"),
+            price=data.get("price"),
+            grossTradeAmount=data.get("grossTradeAmount"),
+            totalVolumeTraded=data.get("totalVolumeTraded"),
+        )
+
+
+@dataclass
+class IndexInfluence:
+    index_name: Optional[str]
+    data: List[IndexInfluenceItem]
+    receivedAt: Optional[float] = field(default=None, repr=False)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "IndexInfluence":
+        return cls(
+            index_name=data.get("index_name"),
+            data=[IndexInfluenceItem.from_dict(item) for item in (data.get("Data") or data.get("data") or [])],
+            receivedAt=data.get("_receivedAt"),
         )
 
 

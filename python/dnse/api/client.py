@@ -31,7 +31,7 @@ class DNSEClient:
             maxsize=10,             # Số connections tối đa mỗi pool
             block=False,            # Không block khi pool đầy
             timeout=urllib3.Timeout(connect=30.0, read=60.0),
-            cert_reqs = 'CERT_NONE',  # Không yêu cầu certificate
+            # cert_reqs = 'CERT_NONE',  # Không yêu cầu certificate
             assert_hostname = False  # Không kiểm tra hostname
         )
 
@@ -244,6 +244,17 @@ class DNSEClient:
             dry_run=dry_run,
         )
 
+    def get_trades_volume_profile(self, symbol, from_date, to_date, board_id=None, dry_run=False):
+        query = {"from": from_date, "to": to_date}
+        if board_id is not None:
+            query["board_id"] = board_id
+        return self._request(
+            "GET",
+            f"/price/{symbol}/trades/volume-profile",
+            query=query,
+            dry_run=dry_run,
+        )
+
     def get_expected_price(self, symbol, board_id=None, from_date=None, to_date=None, limit=None, order = None, next_page_token=None, dry_run=False):
         query = {}
         if board_id is not None:
@@ -303,6 +314,25 @@ class DNSEClient:
         return self._request(
             "GET",
             f"/price/{symbol}/foreign-trading",
+            query=query if query else None,
+            dry_run=dry_run,
+        )
+
+    def get_market_index(self, index_name, from_date=None, to_date=None, limit=None, order=None, next_page_token=None, dry_run=False):
+        query = {}
+        if from_date is not None:
+            query["from"] = from_date
+        if to_date is not None:
+            query["to"] = to_date
+        if limit is not None:
+            query["limit"] = limit
+        if order is not None:
+            query["order"] = order
+        if next_page_token is not None:
+            query["nextPageToken"] = next_page_token
+        return self._request(
+            "GET",
+            f"/price/{index_name}/market-index",
             query=query if query else None,
             dry_run=dry_run,
         )

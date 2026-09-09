@@ -34,8 +34,6 @@ def main():
         order_category="NORMAL",                                # Loại lệnh (NORMAL / STOP / OCO)
         trading_token="replace-with-trading-token",
         payload=payload,
-        trading_token="replace-with-trading-token",
-        order_category="NORMAL",
         dry_run=False,
     )
     print(status, body)

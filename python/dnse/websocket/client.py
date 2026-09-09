@@ -25,7 +25,7 @@ from .exceptions import (
     ConnectionClosed,
 )
 from .models import Trade, Quote, Ohlc, Order, AccountUpdate, ExpectedPrice, SecurityDefinition, TradeExtra, \
-    MarketIndex, ForeignInvestor, Position, EstimatedMarketIndex, Session
+    MarketIndex, ForeignInvestor, Position, EstimatedMarketIndex, Session, IndexInfluence
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -52,6 +52,7 @@ _MSG_TYPE_MAP = {
     "ep": ("position_event", Position, "position"),
     "mi": ("market_index", MarketIndex, None),
     "emi": ("estimated_market_index", EstimatedMarketIndex, "marketIndex"),
+    "ii": ("market_index_influence", IndexInfluence, None),
     "a": ("account", AccountUpdate, None),
     "f": ("foreign", ForeignInvestor, None),
     "s": ("session", Session, None),
@@ -347,6 +348,20 @@ class TradingClient:
 
         if on_estimated_market_index:
             self.on("estimated_market_index", on_estimated_market_index)
+
+    async def subscribe_market_index_influence(
+            self, index_name: str, resolution: int = 1,
+            on_market_index_influence: Optional[Callable[[IndexInfluence], None]] = None, encoding="json"
+    ) -> None:
+        channel = f"market_index_influence.{index_name}.{resolution}.json"
+        if encoding == "msgpack":
+            channel = f"market_index_influence.{index_name}.{resolution}.msgpack"
+        # Index name is encoded in the channel; symbols would create an
+        # additional server-side suffix and no longer match the publisher.
+        await self._subscribe_channel(channel, [])
+
+        if on_market_index_influence:
+            self.on("market_index_influence", on_market_index_influence)
 
     async def subscribe_quotes(
             self, symbols: List[str], on_quote: Optional[Callable[[Quote], None]] = None, encoding="json", board_id=None
