@@ -44,6 +44,16 @@ class DNSEClient {
     });
   }
 
+  getAccountPnlConfigs(accountNo, marketType, { dryRun = false } = {}) {
+    return this.#request('GET', `/accounts/${accountNo}/pnl-configs`, { query: { marketType }, dryRun });
+  }
+
+  patchAccountPnlConfigs(accountNo, marketType, payload, tradingToken, { dryRun = false } = {}) {
+    return this.#request('PATCH', `/accounts/${accountNo}/pnl-configs`, {
+      query: { marketType }, body: payload, headers: { 'trading-token': tradingToken }, dryRun,
+    });
+  }
+
   getOrders(accountNo, marketType, { dryRun = false } = {}) {
     return this.#request('GET', `/accounts/${accountNo}/orders`, {
       query: { marketType },

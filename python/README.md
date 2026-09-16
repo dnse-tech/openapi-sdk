@@ -90,8 +90,11 @@ python sdk/python/api/get_accounts.py
 | `get_positions.py`        | Demonstrates how to retrieve current holding positions.                                                               |
 | `get_positions_by_id.py`  | Demonstrates how to retrieve detailed information of a specific position (by ID).                                     |
 | `get_position_pnl_configs.py` | Demonstrates how to retrieve PnL configs of a derivative position (by ID).                                      |
+| `get_account_pnl_configs.py` | Demonstrates how to retrieve PnL configs of a derivative sub-account.                                      |
 | `post_position_pnl_configs.py` | Demonstrates how to create or update PnL configs of a derivative position (by ID).                           |
+| `patch_account_pnl_configs.py` | Demonstrates how to update PnL configs of a derivative sub-account.                           |
 | `close_position.py`       | Demonstrates how to close an existing position (by ID).                                                               |
+| `reverse_position.py`     | Demonstrates how to reverse an existing derivative position (by ID).                                                   |
 | `send_email_otp.py`       | Demonstrates how to request an OTP sent to your registered email. The OTP is required for generating a trading token. |
 | `create_trading_token.py` | Demonstrates how to generate a Trading Token required for order placement.                                            |
 | `post_order.py`           | Demonstrates how to submit a new trading order.                                                                       |
@@ -123,3 +126,13 @@ python sdk/python/api/get_accounts.py
 | `expected_price.py`   | Demonstrates how to receive expected price data during ATO and ATC sessions.         |
 | `foreign_investor.py` | Demonstrates how to receive foreign investor trading data.                           |
 | `market_index.py`     | Demonstrates how to receive market index data.                                       |
+
+### WebSocket Trading Events
+
+Use `TradingClient.subscribe_order_event()` for both ordinary and conditional
+order updates. Conditional orders use the existing
+`order.{marketType}.{encoding}` subscription and are delivered as `Order`
+objects. For conditional orders, `orderCategory`, `stopPrice`,
+`stopOrderPrice`, `conditionOperator`, `durationType`, `durationDateTime`,
+`errorMessage`, and `externalOrderId` are populated when provided; they are
+`None` for ordinary-order payloads.

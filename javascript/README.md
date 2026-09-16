@@ -45,6 +45,7 @@ Available examples:
 - create_trading_token.js
 - get_accounts.js
 - get_balances.js
+- get_account_pnl_configs.js
 - get_corporate_action_history.js
 - get_execution_detail.js
 - get_positions.js
@@ -56,5 +57,6 @@ Available examples:
 - get_ppse.js
 - get_security_definition.js
 - post_order.js
+- patch_account_pnl_configs.js
 - put_order.js
 - send_email_otp.js

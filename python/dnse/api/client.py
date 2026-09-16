@@ -52,6 +52,41 @@ class DNSEClient:
             dry_run=dry_run,
         )
 
+    def get_loans(
+            self,
+            account_no,
+            market_type,
+            disbursement_from=None,
+            disbursement_to=None,
+            due_date_from=None,
+            due_date_to=None,
+            position_id=None,
+            page_index=None,
+            page_size=None,
+            dry_run=False,
+    ):
+        query = {"marketType": market_type}
+        if disbursement_from is not None:
+            query["disbursementFrom"] = disbursement_from
+        if disbursement_to is not None:
+            query["disbursementTo"] = disbursement_to
+        if due_date_from is not None:
+            query["dueDateFrom"] = due_date_from
+        if due_date_to is not None:
+            query["dueDateTo"] = due_date_to
+        if position_id is not None:
+            query["positionId"] = position_id
+        if page_index is not None:
+            query["pageIndex"] = page_index
+        if page_size is not None:
+            query["pageSize"] = page_size
+        return self._request(
+            "GET",
+            f"/accounts/{account_no}/loans",
+            query=query,
+            dry_run=dry_run,
+        )
+
     def get_positions(self, account_no, market_type, dry_run=False):
         return self._request(
             "GET",
@@ -77,6 +112,22 @@ class DNSEClient:
             version=version,
             dry_run=dry_run,
         )
+
+    def get_account_pnl_configs(self, account_no, market_type, version=None, dry_run=False):
+        return self._request("GET",
+                             f"/accounts/{account_no}/pnl-configs",
+                             query={"marketType": market_type},
+                             version=version,
+                             dry_run=dry_run)
+
+    def patch_account_pnl_configs(self, account_no, market_type, payload, trading_token, version=None, dry_run=False):
+        return self._request("PATCH",
+                             f"/accounts/{account_no}/pnl-configs",
+                             query={"marketType": market_type},
+                             body=payload,
+                             headers={"trading-token": trading_token},
+                             version=version,
+                             dry_run=dry_run)
 
     def post_position_pnl_configs(self, market_type, position_id, payload, trading_token, version=None, dry_run=False):
         headers = {"trading-token": trading_token}
@@ -502,6 +553,17 @@ class DNSEClient:
             query=query,
             headers=headers,
             version=version,
+            dry_run=dry_run,
+        )
+
+    def reverse_position(self, position_id, trading_token, dry_run=False):
+        headers = {"trading-token": trading_token}
+        return self._request(
+            "POST",
+            f"/positions/{position_id}/reverse",
+            query={"marketType": "DERIVATIVE"},
+            headers=headers,
+            version="2026-01-01",
             dry_run=dry_run,
         )
 
