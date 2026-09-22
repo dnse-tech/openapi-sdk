@@ -15,10 +15,9 @@ def main():
     )
 
     status, body = client.get_trades_volume_profile(
-        symbol="GAS",
+        symbol="VIC",
+        time="2026-09-01",
         board_id="G1",
-        from_date=1773282637,
-        to_date=1773289837,
         dry_run=False,
     )
     print(status, body)

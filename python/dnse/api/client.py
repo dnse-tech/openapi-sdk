@@ -295,10 +295,10 @@ class DNSEClient:
             dry_run=dry_run,
         )
 
-    def get_trades_volume_profile(self, symbol, from_date, to_date, board_id=None, dry_run=False):
-        query = {"from": from_date, "to": to_date}
+    def get_trades_volume_profile(self, symbol, time, board_id=None, dry_run=False):
+        query = {"time": time}
         if board_id is not None:
-            query["board_id"] = board_id
+            query["boardId"] = board_id
         return self._request(
             "GET",
             f"/price/{symbol}/trades/volume-profile",
